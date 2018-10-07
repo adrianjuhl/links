@@ -10,6 +10,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.network "private_network", ip: "192.168.33.10"
 
+  config.vm.provision "shell", inline: "apt update"
   config.vm.provision "shell", inline: "apt install --assume-yes /vagrant/buku_3.9-1_ubuntu16.04.amd64.deb"
 end
 
