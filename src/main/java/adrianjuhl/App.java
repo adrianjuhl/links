@@ -3,6 +3,9 @@ package adrianjuhl;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -33,42 +36,25 @@ public class App {
       //  System.out.println("e is " + e.toString());
       //}
       Files.write(Paths.get("data/bookmarks_export.html"), bookmarksHtmlString.getBytes());
-      exportBookmarksFileForVivaldi(doc);
+      System.out.println("doc:\n" + doc.toString());
+      Collection<BookmarkItem> bukuBookmarkItems = bukuBookmarkItems(doc);
+      exportBookmarksFileForVivaldi(bukuBookmarkItems);
     } catch (IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
   }
 
-  private void exportBookmarksFileForVivaldi(Document doc) throws IOException {
-    System.out.println("doc:\n" + doc.toString());
-    Elements bookmarksDtElements = doc.select("body dl dt dl dt");
-    Elements bookmarksDdElements = doc.select("body dl dt dl dd");
-    System.out.println("bookmarksDtElements size is " + bookmarksDtElements.size());
-    System.out.println("bookmarksDdElements size is " + bookmarksDdElements.size());
-    BookmarkItem testBookmarkItem = new BookmarkItem("targeturl", "testbookmarkname");
+  private void exportBookmarksFileForVivaldi(Collection<BookmarkItem> bukuBookmarkItems) throws IOException {
     StringBuilder sb = new StringBuilder();
     sb.append(bookmarkFileHeader());
     sb.append("<DL><p>\n");
     sb.append("  <DT><H3>BookmarksFromExportForVivaldi</H3>\n");
     sb.append("  <DL><p>\n");
     sb.append("    <DT><A HREF=\"http://google.com.au/\">google.com.au/</A>\n");
-    int i=0;
-    for(Element e : bookmarksDtElements) {
-      Element descr = e.nextElementSibling();
-      String descrString = "";
-      if(descr != null && descr.is("dd")) {
-        descrString = descr.toString();
-      } else {
-        descrString = "No corresponding dd element";
-      }
-      Element bukuBookmarkAnchorElement = e.select("a").first();
-      BookmarkItem bukuBookmarkItem = new BookmarkItem(bukuBookmarkAnchorElement.attr("href"), bukuBookmarkAnchorElement.text());
-      //System.out.println("pair: " + ++i + " is " + e.toString() + " - " + descrString);
+    for(BookmarkItem bukuBookmarkItem : bukuBookmarkItems) {
       sb.append("    ").append(bukuBookmarkItem.asNetscapeBookmarkItem()).append("\n");
-      //sb.append("    ").append(bookmarkFileVivaldiBookmark(e, descr)).append("\n");
     }
-    sb.append("    ").append(testBookmarkItem.asNetscapeBookmarkItem()).append("\n");
     sb.append("  </DL><p>\n");
     sb.append("</DL><p>\n");
     Files.write(Paths.get("data/bookmarks_export_for_vivaldi.html"), sb.toString().getBytes());
@@ -95,9 +81,14 @@ public class App {
   private class BookmarkItem {
     private String url;
     private String name;
-    public BookmarkItem(String url, String name) {
+    private List<String> tags;
+    public BookmarkItem(String url, String name, List<String> tags) {
       this.url = url;
       this.name = name;
+      this.tags = new ArrayList<>();
+      for(String tag : tags) {
+        this.tags.add(tag);
+      }
     }
     public String name() {
       return name;
@@ -106,8 +97,24 @@ public class App {
       return url;
     }
     public String asNetscapeBookmarkItem() {
-      return "<DT><A HREF=\"" + url() + "\">" + name() + "</A>";
+      return "<DT><A HREF=\"" + url() + "\" TAGS=\"" + tags.get(0) + "\">" + name() + "</A>";
     }
+  }
+
+  private Collection<BookmarkItem> bukuBookmarkItems(Document doc) {
+    List<BookmarkItem> bookmarkItems = new ArrayList<>();
+    Elements bookmarksDtElements = doc.select("body dl dt dl dt");
+    for(Element e : bookmarksDtElements) {
+      Element bukuBookmarkAnchorElement = e.select("a").first();
+      List<String> tags = new ArrayList<>();
+      String tagsAttr = bukuBookmarkAnchorElement.attr("tags");
+      for(String tag : tagsAttr.split(",")) {
+        tags.add(tag);
+      }
+      BookmarkItem bukuBookmarkItem = new BookmarkItem(bukuBookmarkAnchorElement.attr("href"), bukuBookmarkAnchorElement.text(), tags);
+      bookmarkItems.add(bukuBookmarkItem);
+    }
+    return bookmarkItems;
   }
 
 }
