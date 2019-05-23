@@ -15,6 +15,10 @@
 
 The current vagrant up provisioning copies bookmarks.db from /vagrant/data/bookmarks.db (i.e. in /data in the repo) to ~/.local/share/buku/ for usage by 
 
+# Resources
+
+https://docs.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/platform-apis/aa753582(v=vs.85)
+https://sixtwothree.org/posts/homesteading-a-decades-worth-of-shared-links
 
 # TODO
 * Determine how each kind of browser imports and exports with respect to tags and folder structures.

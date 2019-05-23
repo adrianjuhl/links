@@ -41,11 +41,12 @@ public class App {
   }
 
   private void exportBookmarksFileForVivaldi(Document doc) throws IOException {
-    //System.out.println("doc:\n" + doc.toString());
+    System.out.println("doc:\n" + doc.toString());
     Elements bookmarksDtElements = doc.select("body dl dt dl dt");
     Elements bookmarksDdElements = doc.select("body dl dt dl dd");
     System.out.println("bookmarksDtElements size is " + bookmarksDtElements.size());
     System.out.println("bookmarksDdElements size is " + bookmarksDdElements.size());
+    BookmarkItem testBookmarkItem = new BookmarkItem("targeturl", "testbookmarkname");
     StringBuilder sb = new StringBuilder();
     sb.append(bookmarkFileHeader());
     sb.append("<DL><p>\n");
@@ -61,9 +62,13 @@ public class App {
       } else {
         descrString = "No corresponding dd element";
       }
+      Element bukuBookmarkAnchorElement = e.select("a").first();
+      BookmarkItem bukuBookmarkItem = new BookmarkItem(bukuBookmarkAnchorElement.attr("href"), bukuBookmarkAnchorElement.text());
       //System.out.println("pair: " + ++i + " is " + e.toString() + " - " + descrString);
-      sb.append("    ").append(bookmarkFileVivaldiBookmark(e, descr)).append("\n");
+      sb.append("    ").append(bukuBookmarkItem.asNetscapeBookmarkItem()).append("\n");
+      //sb.append("    ").append(bookmarkFileVivaldiBookmark(e, descr)).append("\n");
     }
+    sb.append("    ").append(testBookmarkItem.asNetscapeBookmarkItem()).append("\n");
     sb.append("  </DL><p>\n");
     sb.append("</DL><p>\n");
     Files.write(Paths.get("data/bookmarks_export_for_vivaldi.html"), sb.toString().getBytes());
@@ -85,6 +90,24 @@ public class App {
       anchorText = ddElement.text();
     }
     return "<DT><A HREF=\"" + href + "\">" + anchorText + "</A>";
+  }
+
+  private class BookmarkItem {
+    private String url;
+    private String name;
+    public BookmarkItem(String url, String name) {
+      this.url = url;
+      this.name = name;
+    }
+    public String name() {
+      return name;
+    }
+    public String url() {
+      return url;
+    }
+    public String asNetscapeBookmarkItem() {
+      return "<DT><A HREF=\"" + url() + "\">" + name() + "</A>";
+    }
   }
 
 }
