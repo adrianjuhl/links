@@ -31,29 +31,39 @@ public class App {
       bookmarksHtmlString = new String(Files.readAllBytes(Paths.get("data/bookmarks_from_buku.html")));
       //System.out.println("File contents: " + bookmarksHtmlString);
       Document doc = Jsoup.parse(bookmarksHtmlString);
-      Elements elements = doc.getElementsByTag("H1");
+      //Elements elements = doc.getElementsByTag("H1");
       //for(Element e : elements) {
       //  System.out.println("e is " + e.toString());
       //}
       Files.write(Paths.get("data/bookmarks_export.html"), bookmarksHtmlString.getBytes());
       System.out.println("doc:\n" + doc.toString());
-      Collection<BookmarkItem> bukuBookmarkItems = bukuBookmarkItems(doc);
-      exportBookmarksFileForVivaldi(bukuBookmarkItems);
+      BookmarkFileItemBookmarkList bukuBookmarkList = new BookmarkFileItemBookmarkArrayList(doc);
+      //Collection<BookmarkFileItemBookmark> bukuBookmarkItems = bukuBookmarkItems(doc);
+      exportBookmarksFileForVivaldi(bukuBookmarkList);
     } catch (IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
   }
 
-  private void exportBookmarksFileForVivaldi(Collection<BookmarkItem> bukuBookmarkItems) throws IOException {
+  private void exportBookmarksFileForVivaldi(BookmarkFileItemBookmarkList bukuBookmarkList) throws IOException {
+    Collection<String> tags = new ArrayList<String>();
+    tags.add("target_folder_path:subfolderOne");
+    BookmarkFileItemBookmark bookmarkItemTest = new BookmarkFileItemBookmark("theurl", "bookmarkname", tags);
+    bukuBookmarkList.add(bookmarkItemTest);
     StringBuilder sb = new StringBuilder();
     sb.append(bookmarkFileHeader());
     sb.append("<DL><p>\n");
     sb.append("  <DT><H3>BookmarksFromExportForVivaldi</H3>\n");
     sb.append("  <DL><p>\n");
     sb.append("    <DT><A HREF=\"http://google.com.au/\">google.com.au/</A>\n");
-    for(BookmarkItem bukuBookmarkItem : bukuBookmarkItems) {
-      sb.append("    ").append(bukuBookmarkItem.asNetscapeBookmarkItem()).append("\n");
+    //BookmarkItems bookmarkItems = new BookmarkItems(bukuBookmarkItemsCollection);
+    for(BookmarkFileItemBookmark bookmarkItem : bukuBookmarkList.asList()) {
+      sb.append("    ").append(bookmarkItem.asNetscapeBookmarkItem()).append("\n");
+    }
+    TagFilteredBookmarkItems tagFilteredBookmarkItems = new TagFilteredBookmarkItems(bukuBookmarkItemsCollection, "14001");
+    for(BookmarkFileItem bookmarkItem : tagFilteredBookmarkItems.asCollection()) {
+      sb.append("  filterednew:  ").append(bookmarkItem.asNetscapeBookmarkItem()).append("\n");
     }
     sb.append("  </DL><p>\n");
     sb.append("</DL><p>\n");
@@ -75,14 +85,14 @@ public class App {
     if(ddElement != null) {
       anchorText = ddElement.text();
     }
-    return "<DT><A HREF=\"" + href + "\">" + anchorText + "</A>";
+    return "<DT><A HREF=\"" + href + "\">" + anchorText + " </A>";
   }
 
-  private class BookmarkItem {
+  private class BookmarkItemOld {
     private String url;
     private String name;
-    private List<String> tags;
-    public BookmarkItem(String url, String name, List<String> tags) {
+    private Collection<String> tags;
+    public BookmarkItemOld(String url, String name, Collection<String> tags) {
       this.url = url;
       this.name = name;
       this.tags = new ArrayList<>();
@@ -96,25 +106,56 @@ public class App {
     public String url() {
       return url;
     }
+    public Collection<String> tags() {
+      return tags;
+    }
     public String asNetscapeBookmarkItem() {
-      return "<DT><A HREF=\"" + url() + "\" TAGS=\"" + tags.get(0) + "\">" + name() + "</A>";
+      return "<DT><A HREF=\"" + url() + "\" TAGS=\"" + tags.iterator().next() + "\">" + name() + "</A>";
     }
   }
 
-  private Collection<BookmarkItem> bukuBookmarkItems(Document doc) {
-    List<BookmarkItem> bookmarkItems = new ArrayList<>();
-    Elements bookmarksDtElements = doc.select("body dl dt dl dt");
-    for(Element e : bookmarksDtElements) {
+  private class BookmarkItems {
+    private Collection<BookmarkFileItem> bookmarkItems;
+    public BookmarkItems(Collection<BookmarkFileItem> bookmarkItems) {
+      this.bookmarkItems = new ArrayList<>();
+      for(BookmarkFileItem bookmarkItem : bookmarkItems) {
+        this.bookmarkItems.add(bookmarkItem);
+      }
+    }
+    public Collection<BookmarkFileItem> asCollection() {
+      return bookmarkItems;
+    }
+  }
+
+  private class TagFilteredBookmarkItems {
+    private Collection<BookmarkFileItem> bookmarkItems;
+    public TagFilteredBookmarkItems(Collection<BookmarkFileItem> bookmarkItems, String tag) {
+      this.bookmarkItems = new ArrayList<>();
+      for(BookmarkFileItem bookmarkItem : bookmarkItems) {
+        if(bookmarkItem.tags.contains(tag)) {
+          this.bookmarkItems.add(bookmarkItem);
+        }
+      }
+    }
+    public Collection<BookmarkFileItem> asCollection() {
+      return bookmarkItems;
+    }
+  }
+
+  private Collection<BookmarkFileItemBookmark> bukuBookmarkItems(Document doc) {
+    List<BookmarkFileItemBookmark> bookmarkFileItemBookmarks = new ArrayList<>();
+    Elements bookmarksDocDtElements = doc.select("body dl dt dl dt");
+    for(Element e : bookmarksDocDtElements) {
       Element bukuBookmarkAnchorElement = e.select("a").first();
       List<String> tags = new ArrayList<>();
       String tagsAttr = bukuBookmarkAnchorElement.attr("tags");
       for(String tag : tagsAttr.split(",")) {
         tags.add(tag);
       }
-      BookmarkItem bukuBookmarkItem = new BookmarkItem(bukuBookmarkAnchorElement.attr("href"), bukuBookmarkAnchorElement.text(), tags);
-      bookmarkItems.add(bukuBookmarkItem);
+      BookmarkFileItemBookmark bukuBookmarkItem = new BookmarkFileItemBookmark(bukuBookmarkAnchorElement.attr("href"), bukuBookmarkAnchorElement.text(), tags);
+      bookmarkFileItemBookmarks.add(bukuBookmarkItem);
     }
-    return bookmarkItems;
+    return bookmarkFileItemBookmarks;
   }
 
 }
