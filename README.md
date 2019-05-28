@@ -5,6 +5,10 @@
     vagrant ssh
     # To print all bookmarks
     buku --print
+    # To run bukuserver
+    cd /vagrant
+    ./run_bukuserver.sh
+    # then browse to http://192.168.33.10:5000/
 
 
 # Export
