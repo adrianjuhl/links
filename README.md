@@ -44,10 +44,10 @@ A SHORTCUTURL is the keyword text
 A TAGS are the tag values, comma separate
 
 Vivaldi
-Bookmarks have the following properties: Title (Name), Address (URL), Nickname, Description
+Bookmarks have the following properties in the app: Title (Name/Label), Address (URL), Nickname, Description
 Nickname and Description are not exported.
 Example export line (HTML):
 <DT><A HREF="http://127.0.0.1/blahbookmark" ADD_DATE="1540289599">127.0.0.1</A>
-A HREF is the URL
-A text is the Name
+The 'DT A HREF' is the Address (URL)
+The 'DT A text' is the Title (Name/Label)
 

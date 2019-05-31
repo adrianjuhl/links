@@ -61,8 +61,8 @@ public class App {
     for(BookmarkFileItemBookmark bookmarkItem : bukuBookmarkList.asList()) {
       sb.append("    ").append(bookmarkItem.asNetscapeBookmarkItem()).append("\n");
     }
-    TagFilteredBookmarkItems tagFilteredBookmarkItems = new TagFilteredBookmarkItems(bukuBookmarkItemsCollection, "14001");
-    for(BookmarkFileItem bookmarkItem : tagFilteredBookmarkItems.asCollection()) {
+    TagFilteredBookmarkFileItemBookmarkList tagFilteredBookmarks = new TagFilteredBookmarkFileItemBookmarkList(bukuBookmarkList, "target_system_id:target_system_id_A");
+    for(BookmarkFileItemBookmark bookmarkItem : tagFilteredBookmarks.asList()) {
       sb.append("  filterednew:  ").append(bookmarkItem.asNetscapeBookmarkItem()).append("\n");
     }
     sb.append("  </DL><p>\n");
@@ -127,18 +127,23 @@ public class App {
     }
   }
 
-  private class TagFilteredBookmarkItems {
-    private Collection<BookmarkFileItem> bookmarkItems;
-    public TagFilteredBookmarkItems(Collection<BookmarkFileItem> bookmarkItems, String tag) {
-      this.bookmarkItems = new ArrayList<>();
-      for(BookmarkFileItem bookmarkItem : bookmarkItems) {
-        if(bookmarkItem.tags.contains(tag)) {
-          this.bookmarkItems.add(bookmarkItem);
+  private class TagFilteredBookmarkFileItemBookmarkList implements BookmarkFileItemBookmarkList {
+    private BookmarkFileItemBookmarkList bookmarkList;
+    public TagFilteredBookmarkFileItemBookmarkList(BookmarkFileItemBookmarkList unfilteredBookmarkList, String filterTag) {
+      this.bookmarkList = new BookmarkFileItemBookmarkArrayList();
+      for(BookmarkFileItemBookmark bookmark : unfilteredBookmarkList.asList()) {
+        if(bookmark.tags().contains(filterTag)) {
+          this.bookmarkList.add(bookmark);
         }
       }
     }
-    public Collection<BookmarkFileItem> asCollection() {
-      return bookmarkItems;
+    @Override
+    public List<BookmarkFileItemBookmark> asList() {
+      return bookmarkList.asList();
+    }
+    @Override
+    public void add(BookmarkFileItemBookmark bookmark) {
+      this.bookmarkList.add(bookmark);
     }
   }
 

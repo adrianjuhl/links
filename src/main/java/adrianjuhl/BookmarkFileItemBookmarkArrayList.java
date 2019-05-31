@@ -10,9 +10,18 @@ import org.jsoup.select.Elements;
 public class BookmarkFileItemBookmarkArrayList implements BookmarkFileItemBookmarkList {
 
   private List<BookmarkFileItemBookmark> bookmarksList;
-  
+
+  public BookmarkFileItemBookmarkArrayList() {
+    this.bookmarksList = new ArrayList<BookmarkFileItemBookmark>();
+  }
+
   public BookmarkFileItemBookmarkArrayList(List<BookmarkFileItemBookmark> bookmarksList) {
-    this.bookmarksList = bookmarksList;
+    this.bookmarksList = new ArrayList<BookmarkFileItemBookmark>();
+    if(bookmarksList != null) {
+      for(BookmarkFileItemBookmark bookmark : bookmarksList) {
+        this.bookmarksList.add(bookmark);
+      }
+    }
   }
 
   public BookmarkFileItemBookmarkArrayList(Document doc) {
