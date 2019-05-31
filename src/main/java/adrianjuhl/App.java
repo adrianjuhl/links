@@ -61,7 +61,7 @@ public class App {
     for(BookmarkFileItemBookmark bookmarkItem : bukuBookmarkList.asList()) {
       sb.append("    ").append(bookmarkItem.asNetscapeBookmarkItem()).append("\n");
     }
-    TagFilteredBookmarkFileItemBookmarkList tagFilteredBookmarks = new TagFilteredBookmarkFileItemBookmarkList(bukuBookmarkList, "target_system_id:target_system_id_A");
+    BookmarkFileItemBookmarkList tagFilteredBookmarks = new TagFilteredBookmarkFileItemBookmarkList(bukuBookmarkList, "target_system_id:target_system_id_A");
     for(BookmarkFileItemBookmark bookmarkItem : tagFilteredBookmarks.asList()) {
       sb.append("  filterednew:  ").append(bookmarkItem.asNetscapeBookmarkItem()).append("\n");
     }
