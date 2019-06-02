@@ -6,9 +6,9 @@ import java.util.List;
 public class BookmarkFileItemFolder implements BookmarkHtmlProducer {
 
   private String labelText;
-  private List<BookmarkFileItem> folderBookmarkItems = new ArrayList<>();
+  private BookmarkFileItemBookmarkList folderBookmarkItems;
 
-  public BookmarkFileItemFolder(String labelText, List<BookmarkFileItem> folderBookmarkItems) {
+  public BookmarkFileItemFolder(String labelText, BookmarkFileItemBookmarkList folderBookmarkItems) {
     this.labelText = labelText;
     this.folderBookmarkItems = folderBookmarkItems;
   }
@@ -22,8 +22,8 @@ public class BookmarkFileItemFolder implements BookmarkHtmlProducer {
     StringBuilder sb = new StringBuilder();
     sb.append("<DT><H3 ADD_DATE=\"1538996246\" LAST_MODIFIED=\"1538996246\">").append(labelText()).append("</H3>\n");
     sb.append("<DL><p>\n");
-    for(BookmarkFileItem bookmarkItem : folderBookmarkItems) {
-      sb.append(bookmarkItem.asNetscapeBookmarkItem());
+    for(BookmarkFileItemBookmark bookmarkItem : folderBookmarkItems.asList()) {
+      sb.append(bookmarkItem.asNetscapeBookmarkItem()).append("\n");
     }
     sb.append("</DL><p>\n");
     return sb.toString();
