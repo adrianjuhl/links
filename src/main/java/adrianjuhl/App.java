@@ -5,7 +5,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -36,7 +38,7 @@ public class App {
       //  System.out.println("e is " + e.toString());
       //}
       Files.write(Paths.get("data/bookmarks_export.html"), bookmarksHtmlString.getBytes());
-      System.out.println("doc:\n" + doc.toString());
+      //System.out.println("doc:\n" + doc.toString());
       BookmarkFileItemBookmarkList bukuBookmarkList = new BookmarkFileItemBookmarkArrayList(doc);
       //Collection<BookmarkFileItemBookmark> bukuBookmarkItems = bukuBookmarkItems(doc);
       exportBookmarksFileForVivaldi(bukuBookmarkList);
@@ -68,6 +70,12 @@ public class App {
     }
     BookmarkFileItemFolder folderTest = new BookmarkFileItemFolder("bookmarkfolder", tagFilteredBookmarks);
     sb.append(folderTest.asNetscapeBookmarkItem());
+    
+    Set<String> folderPaths = getBookmarkMenuFolderPaths(bukuBookmarkList);
+    for(String folderPath : folderPaths) {
+      System.out.println("folderPath: " + folderPath);
+    }
+
     sb.append("  </DL><p>\n");
     sb.append("</DL><p>\n");
     Files.write(Paths.get("data/bookmarks_export_for_vivaldi.html"), sb.toString().getBytes());
@@ -99,6 +107,18 @@ public class App {
     public void add(BookmarkFileItemBookmark bookmark) {
       this.bookmarkList.add(bookmark);
     }
+  }
+
+  private Set<String> getBookmarkMenuFolderPaths(BookmarkFileItemBookmarkList bookmarks) {
+    HashSet<String> folderPaths = new HashSet<>();
+    for(BookmarkFileItemBookmark bookmark : bookmarks.asList()) {
+      for(String tag : bookmark.tags()) {
+        if(tag.contains("bookmark_folder_path:")) {
+          folderPaths.add(tag);
+        }
+      }
+    }
+    return folderPaths;
   }
 
 }

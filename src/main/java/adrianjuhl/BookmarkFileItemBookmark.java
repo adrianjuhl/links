@@ -2,6 +2,8 @@ package adrianjuhl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 public class BookmarkFileItemBookmark implements BookmarkHtmlProducer {
 
@@ -27,7 +29,7 @@ public class BookmarkFileItemBookmark implements BookmarkHtmlProducer {
     return tags;
   }
   public String asNetscapeBookmarkItem() {
-    return "<DT><A HREF=\"" + url() + "\" TAGS=\"" + tags.iterator().next() + "\">" + labelText() + "</A>";
+    return "<DT><A HREF=\"" + url() + "\" TAGS=\"" + tags.stream().collect(Collectors.joining(",")) + "\">" + labelText() + "</A>";
   }
 
 }
