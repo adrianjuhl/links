@@ -2,8 +2,8 @@ package adrianjuhl;
 
 import java.util.List;
 
-public interface BookmarkFileItemList<T extends BookmarkFileItem> {
+public interface BookmarkFileItemList {
 
-  public List<T> asList();
+  public List<BookmarkFileItem> asList();
 
 }

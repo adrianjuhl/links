@@ -40,8 +40,8 @@ public class BookmarkFileItemBookmarkArrayList implements BookmarkFileItemBookma
   }
 
   @Override
-  public List<BookmarkFileItemBookmark> asList() {
-    return bookmarksList;
+  public List<BookmarkFileItem> asList() {
+    return null; //bookmarksList;
   }
 
   public void add(BookmarkFileItemBookmark bookmark) {
