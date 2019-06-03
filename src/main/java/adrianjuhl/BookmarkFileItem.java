@@ -1,5 +1,5 @@
 package adrianjuhl;
 
-public abstract class BookmarkFileItem implements BookmarkHtmlProducer {
+public interface BookmarkFileItem extends BookmarkHtmlProducer {
 
 }

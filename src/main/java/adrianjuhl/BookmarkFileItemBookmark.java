@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
-public class BookmarkFileItemBookmark implements BookmarkHtmlProducer {
+public class BookmarkFileItemBookmark implements BookmarkFileItem {
 
   private String url;
   private String labelText;

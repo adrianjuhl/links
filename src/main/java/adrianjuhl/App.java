@@ -8,6 +8,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -71,10 +73,11 @@ public class App {
     BookmarkFileItemFolder folderTest = new BookmarkFileItemFolder("bookmarkfolder", tagFilteredBookmarks);
     sb.append(folderTest.asNetscapeBookmarkItem());
     
-    Set<String> folderPaths = getBookmarkMenuFolderPaths(bukuBookmarkList);
+    SortedSet<String> folderPaths = getBookmarkMenuFolderPaths(bukuBookmarkList);
     for(String folderPath : folderPaths) {
       System.out.println("folderPath: " + folderPath);
     }
+    
 
     sb.append("  </DL><p>\n");
     sb.append("</DL><p>\n");
@@ -109,12 +112,21 @@ public class App {
     }
   }
 
-  private Set<String> getBookmarkMenuFolderPaths(BookmarkFileItemBookmarkList bookmarks) {
-    HashSet<String> folderPaths = new HashSet<>();
+  private SortedSet<String> getBookmarkMenuFolderPaths(BookmarkFileItemBookmarkList bookmarks) {
+    TreeSet<String> folderPaths = new TreeSet<>();
     for(BookmarkFileItemBookmark bookmark : bookmarks.asList()) {
       for(String tag : bookmark.tags()) {
-        if(tag.contains("bookmark_folder_path:")) {
-          folderPaths.add(tag);
+        if(tag.startsWith("bookmark_menu_folder_path:")) {
+          String path = tag.substring("bookmark_menu_folder_path:".length());
+          String pathBuild = "";
+          for(String s : path.split("/")) {
+            if(pathBuild.isEmpty()) {
+              pathBuild = s;
+            } else {
+              pathBuild = pathBuild + "/" + s;
+            }
+            folderPaths.add(pathBuild);
+          }
         }
       }
     }
