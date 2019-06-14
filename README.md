@@ -51,3 +51,5 @@ Example export line (HTML):
 The 'DT A HREF' is the Address (URL)
 The 'DT A text' is the Title (Name/Label)
 
+
+target_user_id$TAG_ELEMENT_SEPARATOR$<user_id>$TAG_ELEMENT_SEPARATOR$browser_bookmark_menu_path$TAG_ELEMENT_SEPARATOR$<path>

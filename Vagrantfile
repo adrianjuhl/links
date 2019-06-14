@@ -5,7 +5,7 @@ $copy_bookmarks_db = <<-SCRIPT
 echo "copying bookmarks.db if it exists"
 if [ -f /vagrant/data/bookmarks.db ]; then
   mkdir -p ~/.local/share/buku/
-  cp /vagrant/data/bookmarks.db ~/.local/share/buku/
+  ln -s /vagrant/data/bookmarks.db ~/.local/share/buku/bookmarks.db
 fi
 SCRIPT
 
@@ -28,6 +28,13 @@ Vagrant.configure("2") do |config|
 
   # Install bukuserver dependencies
   config.vm.provision "shell", inline: "apt install --assume-yes python3 python3-pip python3-dev libffi-dev"
+
+  # Provision with ansible
+  config.vm.provision "ansible_local" do |ansible|
+    ansible.compatibility_mode = "2.0"
+    ansible.playbook    = ".vagrant/provisioning/ansible/playbooks/main.yml"
+    ansible.galaxy_roles_path = ".ansible/roles/main/:.ansible/roles/external/"
+  end
 
 end
 

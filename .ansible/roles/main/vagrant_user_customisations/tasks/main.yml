@@ -1,0 +1,6 @@
+---
+- name: Configure vagrant user's .bashrc file.
+  template:
+    src: bashrc.j2
+    dest: ~/.bashrc
+    backup: true
