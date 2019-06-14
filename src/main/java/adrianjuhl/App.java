@@ -24,6 +24,8 @@ import org.jsoup.select.Elements;
  */
 public class App {
 
+  public static final String TAG_ELEMENT_SEPARATOR = "$TAG_ELEMENT_SEPARATOR$";
+
   public static void main( String[] args ) {
     //System.out.println( "Hello World!" );
     App app = new App();
@@ -72,6 +74,14 @@ public class App {
     for(BookmarkFileItem bookmarkItem : tagFilteredBookmarks) {
       sb.append("  filterednew:  ").append(bookmarkItem.asNetscapeBookmarkItem()).append("\n");
     }
+
+    String searchValue = "target_user_id" + TAG_ELEMENT_SEPARATOR + "adrian";
+    System.out.println("filter by tag value: " + searchValue);
+    List<BookmarkFileItem> userBookmarks = filterByTagStartsWith(bukuBookmarkList, "target_user_id" + TAG_ELEMENT_SEPARATOR + "adrian");
+    for(BookmarkFileItem bookmarkItem : userBookmarks) {
+      sb.append("  user filtered:  ").append(bookmarkItem.asNetscapeBookmarkItem()).append("\n");
+    }
+
     BookmarkFileItemFolder folderTest = new BookmarkFileItemFolder("bookmarkfolder", tagFilteredBookmarks);
     sb.append(folderTest.asNetscapeBookmarkItem());
     
@@ -189,6 +199,23 @@ public class App {
         BookmarkFileItemBookmark bookmark = (BookmarkFileItemBookmark)bookmarkFileItem;
         if(bookmark.tags().contains(filterTag)) {
           filteredBookmarkFileItems.add(bookmark);
+        }
+      } else if(bookmarkFileItem instanceof BookmarkFileItemFolder) {
+        filteredBookmarkFileItems.add(bookmarkFileItem);
+      }
+    }
+    return filteredBookmarkFileItems;
+  }
+
+  private List<BookmarkFileItem> filterByTagStartsWith(List<BookmarkFileItem> unfilteredBookmarkFileItems, String filterTag) {
+    List<BookmarkFileItem> filteredBookmarkFileItems = new ArrayList<BookmarkFileItem>();
+    for(BookmarkFileItem bookmarkFileItem : unfilteredBookmarkFileItems) {
+      if(bookmarkFileItem instanceof BookmarkFileItemBookmark) {
+        BookmarkFileItemBookmark bookmark = (BookmarkFileItemBookmark)bookmarkFileItem;
+        for(String tag : bookmark.tags()) {
+          if(tag.startsWith(filterTag)) {
+            filteredBookmarkFileItems.add(bookmark);
+          }
         }
       } else if(bookmarkFileItem instanceof BookmarkFileItemFolder) {
         filteredBookmarkFileItems.add(bookmarkFileItem);
