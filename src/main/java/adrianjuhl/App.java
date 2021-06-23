@@ -18,13 +18,9 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-/**
- * Hello world!
- *
- */
 public class App {
 
-  public static final String TAG_ELEMENT_SEPARATOR = "$TAG_ELEMENT_SEPARATOR$";
+  public static final String TAG_ELEMENT_SEPARATOR = "TAG_ELEMENT_SEPARATOR";
 
   public static void main( String[] args ) {
     //System.out.println( "Hello World!" );
@@ -43,59 +39,43 @@ public class App {
       //for(Element e : elements) {
       //  System.out.println("e is " + e.toString());
       //}
-      Files.write(Paths.get("data/bookmarks_export.html"), bookmarksHtmlString.getBytes());
+      //Files.write(Paths.get("data/bookmarks_export.html"), bookmarksHtmlString.getBytes());
       //System.out.println("doc:\n" + doc.toString());
       List<BookmarkFileItem> bukuBookmarkList = getBookmarks(doc);
       //Collection<BookmarkFileItemBookmark> bukuBookmarkItems = bukuBookmarkItems(doc);
-      exportBookmarksFileForVivaldi(bukuBookmarkList);
+      exportBookmarksFileForBrowsers(bukuBookmarkList);
     } catch (IOException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
   }
 
-  private void exportBookmarksFileForVivaldi(List<BookmarkFileItem> bukuBookmarkList) throws IOException {
-    Collection<String> tags = new ArrayList<String>();
-    tags.add("target_folder_path:subfolderOne");
-    tags.add("target_system_id:target_system_id_A");
-    BookmarkFileItemBookmark bookmarkItemTest = new BookmarkFileItemBookmark("theurl", "bookmarkname", tags);
-    bukuBookmarkList.add(bookmarkItemTest);
-    StringBuilder sb = new StringBuilder();
-    sb.append(bookmarkFileHeader());
-    sb.append("<DL><p>\n");
-    sb.append("  <DT><H3>BookmarksFromExportForVivaldi</H3>\n");
-    sb.append("  <DL><p>\n");
-    sb.append("    <DT><A HREF=\"http://google.com.au/\">google.com.au/</A>\n");
-    //BookmarkItems bookmarkItems = new BookmarkItems(bukuBookmarkItemsCollection);
-    for(BookmarkFileItem bookmarkItem : bukuBookmarkList) {
-      sb.append("    ").append(bookmarkItem.asNetscapeBookmarkItem()).append("\n");
-    }
-    List<BookmarkFileItem> tagFilteredBookmarks = filterByTagValue(bukuBookmarkList, "target_system_id:target_system_id_A");
-    for(BookmarkFileItem bookmarkItem : tagFilteredBookmarks) {
-      sb.append("  filterednew:  ").append(bookmarkItem.asNetscapeBookmarkItem()).append("\n");
-    }
+  private void exportBookmarksFileForBrowsers(List<BookmarkFileItem> bukuBookmarkList) throws IOException {
+    //Collection<String> tags = new ArrayList<String>();
+    //tags.add("target_folder_path:subfolderOne");
+    //tags.add("target_system_id:target_system_id_A");
+    //BookmarkFileItemBookmark bookmarkItemTest = new BookmarkFileItemBookmark("theurl", "bookmarkname", tags);
+    //bukuBookmarkList.add(bookmarkItemTest);
 
-    String searchValue = "target_user_id" + TAG_ELEMENT_SEPARATOR + "adrian";
-    System.out.println("filter by tag value: " + searchValue);
-    List<BookmarkFileItem> userBookmarks = filterByTagStartsWith(bukuBookmarkList, "target_user_id" + TAG_ELEMENT_SEPARATOR + "adrian");
-    for(BookmarkFileItem bookmarkItem : userBookmarks) {
-      sb.append("  user filtered:  ").append(bookmarkItem.asNetscapeBookmarkItem()).append("\n");
-    }
-
-    BookmarkFileItemFolder folderTest = new BookmarkFileItemFolder("bookmarkfolder", tagFilteredBookmarks);
-    sb.append(folderTest.asNetscapeBookmarkItem());
     
-    SortedSet<String> folderPaths = getBookmarkMenuFolderPaths(bukuBookmarkList);
+    // Get the bookmarks for the user/context.
+    String contextId = "adrian-work";
+    String searchValue = "ABMT=" + contextId;
+    List<BookmarkFileItem> userBookmarks = filterByTagStartsWith(bukuBookmarkList, searchValue);
+    for(BookmarkFileItem bookmark : userBookmarks) {
+      System.out.println("user bookmark: " + bookmark.asNetscapeBookmarkItem());
+    }
+
+    // Get the folder paths of the bookmarks.
+    SortedSet<String> folderPaths = getBookmarkMenuFolderPaths(userBookmarks, contextId);
     for(String folderPath : folderPaths) {
       System.out.println("folderPath: " + folderPath);
-      
     }
-    
+
+    // Construct the browser bookmarks folder content.
     Map<String,BookmarkFileItemFolder> parentPathToFolderMap = new HashMap<>();
-    BookmarkFileItemFolder browserBookmarkRootFolder = new BookmarkFileItemFolder("bookmarks", null);
+    BookmarkFileItemFolder browserBookmarkRootFolder = new BookmarkFileItemFolder("bookmarks for " + contextId, null);
     parentPathToFolderMap.put(null, browserBookmarkRootFolder);
-    
-    browserBookmarkRootFolder.add(folderTest);
     for(String folderPath : folderPaths) {
       String parentPath;
       int substringIndex = folderPath.lastIndexOf("/");
@@ -108,20 +88,24 @@ public class App {
       System.out.println("folderLabel: " + folderLabel + "  - parentPath: " + parentPath);
       BookmarkFileItemFolder folder = new BookmarkFileItemFolder(folderLabel, null);
       parentPathToFolderMap.put(folderPath, folder);
-      List<BookmarkFileItem> filteredBookmarks = filterByTagValue(bukuBookmarkList, "bookmark_menu_folder_path:" + folderPath);
+      String folderPathTagSearchValue = "ABMT=" + contextId + "~%~" + folderPath;
+      List<BookmarkFileItem> filteredBookmarks = filterByTagValue(userBookmarks, folderPathTagSearchValue);
       for(BookmarkFileItem folderItem : filteredBookmarks) {
+        System.out.println("filtered item for folderpath '" + folderPath + "' : " + folderItem.asNetscapeBookmarkItem());
         folder.add(folderItem);
       }
       parentPathToFolderMap.get(parentPath).add(folder);
     }
-    sb.append("browser bookmarks menu structure start\n");
-    sb.append(browserBookmarkRootFolder.asNetscapeBookmarkItem()).append("\n");
-    sb.append("browser bookmarks menu structure end\n");
     
-
+    StringBuilder sb = new StringBuilder();
+    sb.append(bookmarkFileHeader());
+    sb.append("<DL><p>\n");
+    sb.append("  <DT><H3>BookmarksFromExportForVivaldi</H3>\n");
+    sb.append("  <DL><p>\n");
+    sb.append(browserBookmarkRootFolder.asNetscapeBookmarkItem());
     sb.append("  </DL><p>\n");
     sb.append("</DL><p>\n");
-    Files.write(Paths.get("data/bookmarks_export_for_vivaldi.html"), sb.toString().getBytes());
+    Files.write(Paths.get("data/bookmarks_export_for_browsers.html"), sb.toString().getBytes());
   }
 
   private String bookmarkFileHeader() {
@@ -132,34 +116,16 @@ public class App {
       "<H1>Bookmarks</H1>";
   }
 
-//  private class TagFilteredBookmarkFileItemBookmarkList implements BookmarkFileItemBookmarkList {
-//    private BookmarkFileItemBookmarkList bookmarkList;
-//    public TagFilteredBookmarkFileItemBookmarkList(BookmarkFileItemBookmarkList unfilteredBookmarkList, String filterTag) {
-//      this.bookmarkList = new BookmarkFileItemBookmarkArrayList();
-//      for(BookmarkFileItemBookmark bookmark : unfilteredBookmarkList.asList()) {
-//        if(bookmark.tags().contains(filterTag)) {
-//          this.bookmarkList.add(bookmark);
-//        }
-//      }
-//    }
-//    @Override
-//    public List<BookmarkFileItemBookmark> asList() {
-//      return bookmarkList.asList();
-//    }
-//    @Override
-//    public void add(BookmarkFileItemBookmark bookmark) {
-//      this.bookmarkList.add(bookmark);
-//    }
-//  }
-
-  private SortedSet<String> getBookmarkMenuFolderPaths(List<BookmarkFileItem> bookmarkFileItems) {
+  private SortedSet<String> getBookmarkMenuFolderPaths(List<BookmarkFileItem> bookmarkFileItems, String contextId) {
+    String searchPrefix = "ABMT=" + contextId + "~%~";
+    System.out.println("getBookmarkMenuFolderPaths searchPrefix: " + searchPrefix);
     TreeSet<String> folderPaths = new TreeSet<>();
     for(BookmarkFileItem bookmarkFileItem : bookmarkFileItems) {
       if(bookmarkFileItem instanceof BookmarkFileItemBookmark) {
         BookmarkFileItemBookmark bookmark = (BookmarkFileItemBookmark)bookmarkFileItem;
         for(String tag : bookmark.tags()) {
-          if(tag.startsWith("bookmark_menu_folder_path:")) {
-            String path = tag.substring("bookmark_menu_folder_path:".length());
+          if(tag.startsWith(searchPrefix)) {
+            String path = tag.substring(searchPrefix.length());
             String pathBuild = "";
             for(String s : path.split("/")) {
               if(pathBuild.isEmpty()) {

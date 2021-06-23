@@ -29,7 +29,7 @@ public class BookmarkFileItemBookmark implements BookmarkFileItem {
     return tags;
   }
   public String asNetscapeBookmarkItem() {
-    return "<DT><A HREF=\"" + url() + "\" TAGS=\"" + tags.stream().collect(Collectors.joining(",")) + "\">" + labelText() + "</A>";
+    return "<DT><A HREF=\"" + url() + "\" TAGS=\"" + tags.stream().collect(Collectors.joining(",")) + "\">" + labelText() + "</A>\n";
   }
 
 }
